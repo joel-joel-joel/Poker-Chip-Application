@@ -84,7 +84,7 @@ public class UserService {
     }
 
     public List<User> findWithinDateRange(LocalDateTime start, LocalDateTime end){
-        return userRepo.findWithinDateRange(start, end);
+        return userRepo.findUserByCreatedAtBetween(start, end);
     }
 
     public List<User> findAfterDate(LocalDateTime date){

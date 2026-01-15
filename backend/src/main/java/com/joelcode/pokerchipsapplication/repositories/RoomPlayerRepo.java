@@ -19,7 +19,7 @@ import java.util.UUID;
 public interface RoomPlayerRepo extends JpaRepository<RoomPlayer, UUID> {
     Optional<RoomPlayer> findByUserAndRoom(User user, Room room);
 
-    Optional<RoomPlayer> findByUserIDAndRoomId(UUID id, UUID room);
+    Optional<RoomPlayer> findByUserIdAndRoomId(UUID id, UUID room);
 
     List<RoomPlayer> findAllByRoom(Room room);
 

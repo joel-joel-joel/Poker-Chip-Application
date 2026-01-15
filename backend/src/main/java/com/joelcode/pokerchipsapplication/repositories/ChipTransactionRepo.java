@@ -18,7 +18,7 @@ public interface ChipTransactionRepo extends JpaRepository<ChipTransaction, UUID
     // ==== TRANSACTION HISTORY ====
 
     // Get all transactions in a room (chronological order)
-    List<ChipTransaction> findByRoomOrderByCreatedAtDesc(Room room);
+    List<ChipTransaction> findByRoomAndCreatedAtAfterOrderByCreatedAtDesc(Room room, LocalDateTime createdAtAfter);
 
     // Get all transactions involving a specific player
     @Query("SELECT ct FROM ChipTransaction ct " +
@@ -27,8 +27,7 @@ public interface ChipTransactionRepo extends JpaRepository<ChipTransaction, UUID
     List<ChipTransaction> findTransactionsByPlayer(@Param("playerId") UUID playerId);
 
     // Get transactions by type (transfer, ante, blinds, etc.)
-    List<ChipTransaction> findByTransactionTypeAndRoomOrderByCreatedAtDesc(
-            ChipTransaction.transactionType type, Room room);
+    List<ChipTransaction> findByTransactionTypeAndRoom(ChipTransaction.transactionType type, Room room);
 
     // Get recent transactions (last N hours)
     @Query("SELECT ct FROM ChipTransaction ct " +
@@ -40,7 +39,7 @@ public interface ChipTransactionRepo extends JpaRepository<ChipTransaction, UUID
     // ==== PAGINATION FOR LARGE TRANSACTION LISTS ====
 
     // Paginated room transaction history
-    Page<ChipTransaction> findByRoomOrderByCreatedAtDesc(Room room, Pageable pageable);
+    Page<ChipTransaction> findByRoom_CreatedAt(LocalDateTime room_createdAt, Pageable pageable);
 
     // ==== STATISTICS AND REPORTING ====
 

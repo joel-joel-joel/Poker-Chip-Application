@@ -7,7 +7,6 @@ import com.joelcode.pokerchipsapplication.entities.ChipTransaction;
 import com.joelcode.pokerchipsapplication.entities.Room;
 import com.joelcode.pokerchipsapplication.entities.RoomPlayer;
 import com.joelcode.pokerchipsapplication.repositories.ChipTransactionRepo;
-import com.joelcode.pokerchipsapplication.repositories.RoomPlayerRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,14 +30,14 @@ public class ChipTransactionService {
     @Autowired
     private RoomPlayerService roomPlayerService;
 
+    @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
 
     // ==== TRANSACTION CREATION ====
     public ChipTransaction recordTransfer(RoomPlayer fromPlayer, RoomPlayer toPlayer,
                                          Integer amount, ChipTransaction.transactionType type) {
-        ChipTransaction transaction = new ChipTransaction(fromPlayer, toPlayer, fromPlayer.getRoom(), amount);
-        transaction.setTransactionType(type);
+        ChipTransaction transaction = new ChipTransaction(fromPlayer, toPlayer, fromPlayer.getRoom(), amount, type, LocalDateTime.now());
 
         return chipTransactionRepo.save(transaction);
     }
@@ -52,8 +51,7 @@ public class ChipTransactionService {
     }
 
     public ChipTransaction recordBuyin (RoomPlayer player, Integer amount) {
-        ChipTransaction transaction = new ChipTransaction(null, player, player.getRoom(), amount);
-        transaction.setTransactionType(ChipTransaction.transactionType.BUYIN);
+        ChipTransaction transaction = new ChipTransaction(null, player, player.getRoom(), amount, ChipTransaction.transactionType.BUYIN, LocalDateTime.now());
 
         return chipTransactionRepo.save(transaction);
     }
@@ -70,7 +68,7 @@ public class ChipTransactionService {
         RoomPlayer fromPlayer = roomPlayerService.findByUserID(fromPlayerId);
         RoomPlayer toPlayer = roomPlayerService.findByUserID(toPlayerId);
 
-        ChipTransaction transaction = new ChipTransaction(fromPlayer, toPlayer, fromPlayer.getRoom(), amount);
+        ChipTransaction transaction = new ChipTransaction(fromPlayer, toPlayer, fromPlayer.getRoom(), amount, type, LocalDateTime.now());
 
         ChipTransferEvent event = new ChipTransferEvent(
                 fromPlayer.getUser().getUsername(),
@@ -123,11 +121,11 @@ public class ChipTransactionService {
     }
 
     public List<ChipTransaction> getRoomTransactions(Room room) {
-        return chipTransactionRepo.findByRoomOrderByCreatedAtDesc(room);
+        return chipTransactionRepo.findByRoomAndCreatedAtAfterOrderByCreatedAtDesc(room, room.getCreatedAt());
     }
 
     public List<ChipTransaction> getTransactionByType(ChipTransaction.transactionType type, Room room){
-        return chipTransactionRepo.findByTransactionTypeAndRoomOrderByCreatedAtDesc(type, room);
+        return chipTransactionRepo.findByTransactionTypeAndRoom(type, room);
     }
 
     public List<ChipTransaction> getRecentTransactions (UUID roomId, long hours){
@@ -138,11 +136,11 @@ public class ChipTransactionService {
     // ==== PAGINATED QUERIES ====
 
     public List<ChipTransaction> getRoomTransactionHistory(Room room) {
-        return chipTransactionRepo.findByRoomOrderByCreatedAtDesc(room);
+        return chipTransactionRepo.findByRoomAndCreatedAtAfterOrderByCreatedAtDesc(room, room.getCreatedAt());
     }
 
     public Page<ChipTransaction> getRoomTransactionHistoryPaginated(Room room, Pageable pageable) {
-        return chipTransactionRepo.findByRoomOrderByCreatedAtDesc(room, pageable);
+        return chipTransactionRepo.findByRoom_CreatedAt(room.getCreatedAt(), pageable);
     }
 
     public List<ChipTransaction> getLargestTransactions(UUID roomId, int limit) {

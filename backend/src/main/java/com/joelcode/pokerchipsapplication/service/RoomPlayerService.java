@@ -76,7 +76,7 @@ public class RoomPlayerService {
     }
 
     public void removePlayerFromRoom(UUID roomId, UUID userId) {
-        RoomPlayer roomPlayer = roomPlayerRepo.findByUserIDAndRoomId(userId, roomId)
+        RoomPlayer roomPlayer = roomPlayerRepo.findByUserIdAndRoomId(userId, roomId)
                 .orElseThrow(() -> new PlayerNotInRoomException("Player not in room"));
 
         roomPlayerRepo.delete(roomPlayer);
@@ -94,7 +94,7 @@ public class RoomPlayerService {
     }
 
     public RoomPlayer findByUserIdAndRoomID(UUID userID, UUID roomID) {
-        return roomPlayerRepo.findByUserIDAndRoomId(userID, roomID)
+        return roomPlayerRepo.findByUserIdAndRoomId(userID, roomID)
                 .orElseThrow(() -> new PlayerNotInRoomException("Player not in room"));
     }
 

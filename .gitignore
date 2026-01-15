@@ -37,3 +37,9 @@ frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/*.local
+
+### Environment Variables ###
+backend/.env
+backend/.env.local
+frontend/.env
+frontend/.env.local

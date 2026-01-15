@@ -110,8 +110,10 @@ public class RoomPlayer {
 
     // Player status is now defined within RoomPlayer for cohesion
     public enum PlayerStatus {
-        ACTIVE,
-        INACTIVE
+        ACTIVE,    // In game and in current hand
+        FOLDED,    // Folded in current hand, still in game
+        INACTIVE,  // Left game or eliminated
+        ALL_IN     // Went all-in in current hand
     }
 }
 

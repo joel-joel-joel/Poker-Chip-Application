@@ -11,14 +11,15 @@ import java.util.UUID;
 @Table(name = "chip_transaction")
 public class ChipTransaction {
 
-    public ChipTransaction(RoomPlayer fromPlayer, RoomPlayer toPlayer, Room room, int chipsAmount) {
+    public ChipTransaction(RoomPlayer fromPlayer, RoomPlayer toPlayer, Room room, int chipsAmount, transactionType transactionType, LocalDateTime createdAt) {
         this.fromPlayer = fromPlayer;
         this.toPlayer = toPlayer;
         this.room = room;
         this.chipsAmount = chipsAmount;
+        this.transactionType = transactionType;
+        this.createdAt = createdAt;
     }
 
-    public ChipTransaction() {}
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -44,6 +45,12 @@ public class ChipTransaction {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private transactionType transactionType;
+
+    private LocalDateTime createdAt;
+
+    public ChipTransaction() {
+
+    }
 
     // Creates description of transaction type
     public String getDescription() {
