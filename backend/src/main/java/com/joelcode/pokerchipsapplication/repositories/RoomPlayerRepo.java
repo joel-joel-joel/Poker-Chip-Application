@@ -23,6 +23,8 @@ public interface RoomPlayerRepo extends JpaRepository<RoomPlayer, UUID> {
 
     List<RoomPlayer> findAllByRoom(Room room);
 
+    List<RoomPlayer> findAllByRoom_Id(UUID roomId);
+
     List<RoomPlayer> findByUser(User user);
     
     boolean existsByUserAndRoom(User user, Room room);

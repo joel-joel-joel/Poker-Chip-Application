@@ -41,6 +41,12 @@ public class RoomPlayer {
     @Enumerated(EnumType.STRING)
     private PlayerStatus status;
 
+    @Column(name = "current_hand_bet")
+    private int currentHandBet = 0;  // Amount bet in current round
+
+    @Column(name = "is_all_in")
+    private boolean isAllIn = false;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -106,6 +112,22 @@ public class RoomPlayer {
 
     public void setStatus(PlayerStatus status) {
         this.status = status;
+    }
+
+    public int getCurrentHandBet() {
+        return currentHandBet;
+    }
+
+    public void setCurrentHandBet(int currentHandBet) {
+        this.currentHandBet = currentHandBet;
+    }
+
+    public boolean isAllIn() {
+        return isAllIn;
+    }
+
+    public void setAllIn(boolean allIn) {
+        isAllIn = allIn;
     }
 
     // Player status is now defined within RoomPlayer for cohesion

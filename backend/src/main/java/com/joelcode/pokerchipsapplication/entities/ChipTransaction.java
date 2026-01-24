@@ -25,20 +25,25 @@ public class ChipTransaction {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    // retrieve fee from specific player
+    // retrieve fee from specific player (nullable for pot wins)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(unique = true, nullable = false, name = "from_player_id")
+    @JoinColumn(unique = true, nullable = true, name = "from_player_id")
     private RoomPlayer fromPlayer;
 
-    // transference of fees to new player
+    // transference of fees to new player (nullable for pot contributions)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "to_player_id")
+    @JoinColumn(nullable = true, name = "to_player_id")
     private RoomPlayer toPlayer;
 
     // link transaction to player in specific room
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "room")
     private Room room;
+
+    // link transaction to specific game round
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "round_id")
+    private GameRound round;
 
     private int chipsAmount;
 
@@ -84,6 +89,14 @@ public class ChipTransaction {
         this.room = room;
     }
 
+    public GameRound getRound() {
+        return round;
+    }
+
+    public void setRound(GameRound round) {
+        this.round = round;
+    }
+
     public int getChipsAmount() {
         return chipsAmount;
     }
@@ -96,26 +109,85 @@ public class ChipTransaction {
         getDescription();
     }
 
+    public transactionType getTransactionType() {
+        return transactionType;
+    }
+
     public void setTransactionType(transactionType type) {
+        this.transactionType = type;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getHappenedAt() {
+        return happenedAt;
     }
 
     public enum transactionType {
         CALL {
             @Override
             public String describe(RoomPlayer from, RoomPlayer to, int amount) {
-                return from.getUser().getUsername() + " called with $" + amount;
+                return from != null ? from.getUser().getUsername() + " called $" + amount : "Unknown player called $" + amount;
             }
         },
         RAISE {
             @Override
             public String describe(RoomPlayer from, RoomPlayer to, int amount) {
-                return from.getUser().getUsername() + " raised with $" + amount;
+                return from != null ? from.getUser().getUsername() + " raised to $" + amount : "Unknown player raised to $" + amount;
             }
         },
         BUYIN {
             @Override
             public String describe(RoomPlayer from, RoomPlayer to, int amount) {
-                return to.getUser().getUsername() + " bought in with $" + amount;
+                return to != null ? to.getUser().getUsername() + " bought in for $" + amount : "Unknown player bought in for $" + amount;
+            }
+        },
+        BET {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return from != null ? from.getUser().getUsername() + " bet $" + amount : "Unknown player bet $" + amount;
+            }
+        },
+        CHECK {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return from != null ? from.getUser().getUsername() + " checked" : "Unknown player checked";
+            }
+        },
+        FOLD {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return from != null ? from.getUser().getUsername() + " folded" : "Unknown player folded";
+            }
+        },
+        ALL_IN {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return from != null ? from.getUser().getUsername() + " went all-in for $" + amount : "Unknown player went all-in for $" + amount;
+            }
+        },
+        WIN {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return to != null ? to.getUser().getUsername() + " won $" + amount : "Unknown player won $" + amount;
+            }
+        },
+        BLIND_SMALL {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return from != null ? from.getUser().getUsername() + " posted small blind $" + amount : "Unknown player posted small blind $" + amount;
+            }
+        },
+        BLIND_BIG {
+            @Override
+            public String describe(RoomPlayer from, RoomPlayer to, int amount) {
+                return from != null ? from.getUser().getUsername() + " posted big blind $" + amount : "Unknown player posted big blind $" + amount;
             }
         };
 

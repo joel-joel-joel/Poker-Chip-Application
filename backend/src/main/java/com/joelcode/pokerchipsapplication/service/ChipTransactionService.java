@@ -4,6 +4,7 @@ import com.joelcode.pokerchipsapplication.dto.other.ChipDistribution;
 import com.joelcode.pokerchipsapplication.dto.other.HourlyTransactionActivity;
 import com.joelcode.pokerchipsapplication.dto.other.PlayerChipStatistics;
 import com.joelcode.pokerchipsapplication.entities.ChipTransaction;
+import com.joelcode.pokerchipsapplication.entities.GameRound;
 import com.joelcode.pokerchipsapplication.entities.Room;
 import com.joelcode.pokerchipsapplication.entities.RoomPlayer;
 import com.joelcode.pokerchipsapplication.repositories.ChipTransactionRepo;
@@ -253,6 +254,62 @@ public class ChipTransactionService {
         }
 
         return transactions;
+    }
+
+    // ==== POT-BASED TRANSACTION RECORDING ====
+    // These methods handle transactions where chips go to/from the pot (not player-to-player)
+
+    public ChipTransaction recordBetToPot(GameRound round, RoomPlayer player, int amount,
+                                          ChipTransaction.transactionType type) {
+        ChipTransaction transaction = new ChipTransaction();
+        transaction.setFromPlayer(player);
+        transaction.setToPlayer(null);  // To pot, not to player
+        transaction.setRoom(round.getRoom());
+        transaction.setRound(round);
+        transaction.setChipsAmount(amount);
+        transaction.setTransactionType(type);
+        transaction.setCreatedAt(LocalDateTime.now());
+        // Note: happenedAt is set automatically via @CreationTimestamp
+        return chipTransactionRepo.save(transaction);
+    }
+
+    public ChipTransaction recordWin(GameRound round, RoomPlayer winner, int potAmount) {
+        ChipTransaction transaction = new ChipTransaction();
+        transaction.setFromPlayer(null);  // From pot
+        transaction.setToPlayer(winner);
+        transaction.setRoom(round.getRoom());
+        transaction.setRound(round);
+        transaction.setChipsAmount(potAmount);
+        transaction.setTransactionType(ChipTransaction.transactionType.WIN);
+        transaction.setCreatedAt(LocalDateTime.now());
+        // Note: happenedAt is set automatically via @CreationTimestamp
+        return chipTransactionRepo.save(transaction);
+    }
+
+    public ChipTransaction recordFold(GameRound round, RoomPlayer player) {
+        ChipTransaction transaction = new ChipTransaction();
+        transaction.setFromPlayer(player);
+        transaction.setToPlayer(null);
+        transaction.setRoom(round.getRoom());
+        transaction.setRound(round);
+        transaction.setChipsAmount(0);
+        transaction.setTransactionType(ChipTransaction.transactionType.FOLD);
+        transaction.setCreatedAt(LocalDateTime.now());
+        // Note: happenedAt is set automatically via @CreationTimestamp
+        return chipTransactionRepo.save(transaction);
+    }
+
+    public ChipTransaction recordCheck(GameRound round, RoomPlayer player) {
+        ChipTransaction transaction = new ChipTransaction();
+        transaction.setFromPlayer(player);
+        transaction.setToPlayer(null);
+        transaction.setRoom(round.getRoom());
+        transaction.setRound(round);
+        transaction.setChipsAmount(0);
+        transaction.setTransactionType(ChipTransaction.transactionType.CHECK);
+        transaction.setCreatedAt(LocalDateTime.now());
+        // Note: happenedAt is set automatically via @CreationTimestamp
+        return chipTransactionRepo.save(transaction);
     }
 }
 
