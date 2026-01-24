@@ -19,7 +19,7 @@ public class RoomResponse {
 
     public RoomResponse() {}
 
-    public RoomResponse(Room room){
+    public RoomResponse(Room room, Integer currentPlayerCount){
         this.id = room.getId();
         this.code = room.getCode();
         this.name = room.getRoomName();
@@ -27,8 +27,13 @@ public class RoomResponse {
         this.roomStatus = room.getStatus();
         this.maxPlayers = room.getMaxPlayers();
         this.startingChips = room.getStaringChips();
-        this.currentPlayerCount = room.getRoomPlayers().size();
+        this.currentPlayerCount = currentPlayerCount;
         this.createdAt = room.getCreatedAt();
+    }
+
+    // Backwards-compatible constructor (for legacy calls)
+    public RoomResponse(Room room){
+        this(room, 0);
     }
 
     public UUID getId() { return id; }

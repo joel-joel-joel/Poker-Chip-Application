@@ -5,19 +5,19 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "room")
 public class Room {
 
-    public Room(String roomName, User host, roomStatus status, int maxPlayers, int staringChips, ArrayList<RoomPlayer> roomPlayers, String code) {
+    public Room(String roomName, User host, roomStatus status, int maxPlayers, int staringChips, String code) {
         this.roomName = roomName;
         this.host = host;
         this.status = status;
         this.maxPlayers = maxPlayers;
         this.staringChips = staringChips;
-        this.roomPlayers = roomPlayers;
         this.code = code;
     }
 
@@ -50,7 +50,7 @@ public class Room {
     private LocalDateTime endedAt;
 
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
-    private ArrayList<RoomPlayer> roomPlayers = new ArrayList<>();
+    private List<RoomPlayer> roomPlayers = new ArrayList<>();
 
     @Column(name = "code", unique = true, length = 6, nullable = false)
     private String code;
@@ -119,12 +119,8 @@ public class Room {
         this.endedAt = endedAt;
     }
 
-    public ArrayList<RoomPlayer> getRoomPlayers() {
+    public List<RoomPlayer> getRoomPlayers() {
         return roomPlayers;
-    }
-
-    public void setRoomPlayers(ArrayList<RoomPlayer> roomPlayers) {
-        this.roomPlayers = roomPlayers;
     }
 
     // Backwards-compatible getter (as currently referenced in DTO)

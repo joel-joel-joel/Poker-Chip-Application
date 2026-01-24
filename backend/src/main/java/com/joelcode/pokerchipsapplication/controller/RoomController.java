@@ -4,9 +4,11 @@ import com.joelcode.pokerchipsapplication.dto.request.CreateRoomRequest;
 import com.joelcode.pokerchipsapplication.dto.response.GameStateResponse;
 import com.joelcode.pokerchipsapplication.dto.response.RoomResponse;
 import com.joelcode.pokerchipsapplication.entities.Room;
+import com.joelcode.pokerchipsapplication.repositories.RoomPlayerRepo;
 import com.joelcode.pokerchipsapplication.security.UserPrincipal;
 import com.joelcode.pokerchipsapplication.service.RoomService;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,12 +20,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/rooms")
 @CrossOrigin(origins = "*")
 
 
 public class RoomController {
     private final RoomService roomService;
+
+    @Autowired
+    private RoomPlayerRepo roomPlayerRepo;
 
     public RoomController(RoomService roomService) {
         this.roomService = roomService;
@@ -36,14 +41,16 @@ public class RoomController {
             Authentication authentication) {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         Room room = roomService.createNewRoom(request.getName(), request.getMaxPlayers(), request.getStartingChips(), principal.getUser());
-        return ResponseEntity.ok(new RoomResponse(room));
+        Long playerCount = roomPlayerRepo.getPlayerCountInRoom(room.getId());
+        return ResponseEntity.ok(new RoomResponse(room, playerCount.intValue()));
     }
 
     // Get room by code = GET /api/rooms/ABC123
     @GetMapping("/{roomCode}")
     public ResponseEntity<RoomResponse> getRoomByCode(@PathVariable String roomCode) {
         Room room = roomService.findByCode(roomCode);
-        return ResponseEntity.ok(new RoomResponse(room));
+        Long playerCount = roomPlayerRepo.getPlayerCountInRoom(room.getId());
+        return ResponseEntity.ok(new RoomResponse(room, playerCount.intValue()));
     }
 
     // Get room game state - GET /api/rooms/ABC123/state
@@ -58,7 +65,10 @@ public class RoomController {
     public ResponseEntity<List<RoomResponse>> getAvailableRooms() {
         List<Room> rooms = roomService.getActiveRoomsWithMinPlayers(2);
         List<RoomResponse> response = rooms.stream()
-                .map(RoomResponse::new)
+                .map(room -> {
+                    Long count = roomPlayerRepo.getPlayerCountInRoom(room.getId());
+                    return new RoomResponse(room, count.intValue());
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -70,7 +80,10 @@ public class RoomController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Room> rooms = roomService.getWaitingRooms(pageable);
-        Page<RoomResponse> response = rooms.map(RoomResponse::new);
+        Page<RoomResponse> response = rooms.map(room -> {
+            Long count = roomPlayerRepo.getPlayerCountInRoom(room.getId());
+            return new RoomResponse(room, count.intValue());
+        });
         return ResponseEntity.ok(response);
     }
 
@@ -80,7 +93,10 @@ public class RoomController {
             @RequestParam(defaultValue = "2") int minPlayers) {
         List<Room> rooms = roomService.getActiveRoomsWithMinPlayers(minPlayers);
         List<RoomResponse> response = rooms.stream()
-                .map(RoomResponse::new)
+                .map(room -> {
+                    Long count = roomPlayerRepo.getPlayerCountInRoom(room.getId());
+                    return new RoomResponse(room, count.intValue());
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
@@ -92,7 +108,10 @@ public class RoomController {
         UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         List<Room> rooms = roomService.getUserRooms(principal.getUser());
         List<RoomResponse> response = rooms.stream()
-                .map(RoomResponse::new)
+                .map(room -> {
+                    Long count = roomPlayerRepo.getPlayerCountInRoom(room.getId());
+                    return new RoomResponse(room, count.intValue());
+                })
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }

@@ -27,11 +27,11 @@ public class RoomPlayer {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "user")
+    @JoinColumn (name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn (name = "room")
+    @JoinColumn (name = "room_id")
     private Room room;
 
     private int chipBalance;
