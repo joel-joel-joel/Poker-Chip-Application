@@ -164,7 +164,7 @@ curl -X GET http://localhost:8080/api/room-players/room/$ROOM_CODE | jq '.'
 [
   {
     "id": "uuid-alice",
-    "username": "alice",
+    "username": "alice", 
     "chipBalance": 1000,
     "position": 0,
     "status": "ACTIVE"

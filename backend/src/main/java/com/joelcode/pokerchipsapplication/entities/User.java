@@ -13,11 +13,10 @@ import java.util.UUID;
 @Table(name = "users")
 //Stores basic information on User, as well as the list of room players in the game
 public class User {
-    public User(String username, String email, String password, List<RoomPlayer> roomPlayers) {
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.roomPlayers = roomPlayers;
     }
 
     public User() {
@@ -28,13 +27,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(unique = true, nullable = false, length = 225)
     private String username;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 225)
     private String email;
 
-    @Column (nullable = false, length = 50)
+    @Column (nullable = false, length = 225)
     private String password;
 
     @CreationTimestamp
@@ -87,10 +86,6 @@ public class User {
 
     public List<RoomPlayer> getRoomPlayers() {
         return roomPlayers;
-    }
-
-    public void setRoomPlayers(List<RoomPlayer> roomPlayers) {
-        this.roomPlayers = roomPlayers;
     }
 
 

@@ -27,7 +27,7 @@ public class ChipTransaction {
 
     // retrieve fee from specific player (nullable for pot wins)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(unique = true, nullable = true, name = "from_player_id")
+    @JoinColumn(nullable = true, name = "from_player_id")
     private RoomPlayer fromPlayer;
 
     // transference of fees to new player (nullable for pot contributions)
