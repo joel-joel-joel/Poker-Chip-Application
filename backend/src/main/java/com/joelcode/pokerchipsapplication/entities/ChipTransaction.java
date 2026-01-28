@@ -129,6 +129,14 @@ public class ChipTransaction {
         return happenedAt;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public enum transactionType {
         CALL {
             @Override

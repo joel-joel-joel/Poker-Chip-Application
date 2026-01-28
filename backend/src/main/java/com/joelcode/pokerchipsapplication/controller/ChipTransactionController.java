@@ -4,6 +4,7 @@ import com.joelcode.pokerchipsapplication.dto.other.ChipDistribution;
 import com.joelcode.pokerchipsapplication.dto.other.HourlyTransactionActivity;
 import com.joelcode.pokerchipsapplication.dto.other.PlayerChipStatistics;
 import com.joelcode.pokerchipsapplication.dto.request.TransferChipsRequest;
+import com.joelcode.pokerchipsapplication.dto.response.ChipTransactionDTO;
 import com.joelcode.pokerchipsapplication.entities.ChipTransaction;
 import com.joelcode.pokerchipsapplication.entities.Room;
 import com.joelcode.pokerchipsapplication.entities.ChipTransaction.transactionType;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -66,10 +68,13 @@ public class ChipTransactionController {
      * GET /api/transactions/room/ABC123
      */
     @GetMapping("/room/{roomCode}")
-    public ResponseEntity<List<ChipTransaction>> getRoomTransactions(@PathVariable String roomCode) {
+    public ResponseEntity<List<ChipTransactionDTO>> getRoomTransactions(@PathVariable String roomCode) {
         Room room = roomService.findByCode(roomCode);
         List<ChipTransaction> transactions = chipTransactionService.getRoomTransactionHistory(room);
-        return ResponseEntity.ok(transactions);
+        List<ChipTransactionDTO> dtos = transactions.stream()
+            .map(ChipTransactionDTO::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -94,9 +99,12 @@ public class ChipTransactionController {
      * GET /api/transactions/player/{playerId}
      */
     @GetMapping("/player/{playerId}")
-    public ResponseEntity<List<ChipTransaction>> getPlayerTransactions(@PathVariable UUID playerId) {
+    public ResponseEntity<List<ChipTransactionDTO>> getPlayerTransactions(@PathVariable UUID playerId) {
         List<ChipTransaction> transactions = chipTransactionService.getPlayerTransactions(playerId);
-        return ResponseEntity.ok(transactions);
+        List<ChipTransactionDTO> dtos = transactions.stream()
+            .map(ChipTransactionDTO::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -104,12 +112,15 @@ public class ChipTransactionController {
      * GET /api/transactions/room/ABC123/type/TRANSFER
      */
     @GetMapping("/room/{roomCode}/type/{type}")
-    public ResponseEntity<List<ChipTransaction>> getTransactionsByType(
+    public ResponseEntity<List<ChipTransactionDTO>> getTransactionsByType(
             @PathVariable String roomCode,
             @PathVariable ChipTransaction.transactionType type) {
         Room room = roomService.findByCode(roomCode);
         List<ChipTransaction> transactions = chipTransactionService.getTransactionByType(type, room);
-        return ResponseEntity.ok(transactions);
+        List<ChipTransactionDTO> dtos = transactions.stream()
+            .map(ChipTransactionDTO::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -117,11 +128,14 @@ public class ChipTransactionController {
      * GET /api/transactions/room/{roomId}/recent?hours=24
      */
     @GetMapping("/room/{roomId}/recent")
-    public ResponseEntity<List<ChipTransaction>> getRecentTransactions(
+    public ResponseEntity<List<ChipTransactionDTO>> getRecentTransactions(
             @PathVariable UUID roomId,
             @RequestParam(defaultValue = "24") int hours) {
         List<ChipTransaction> transactions = chipTransactionService.getRecentTransactions(roomId, hours);
-        return ResponseEntity.ok(transactions);
+        List<ChipTransactionDTO> dtos = transactions.stream()
+            .map(ChipTransactionDTO::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
@@ -129,11 +143,14 @@ public class ChipTransactionController {
      * GET /api/transactions/room/{roomId}/largest?limit=10
      */
     @GetMapping("/room/{roomId}/largest")
-    public ResponseEntity<List<ChipTransaction>> getLargestTransactions(
+    public ResponseEntity<List<ChipTransactionDTO>> getLargestTransactions(
             @PathVariable UUID roomId,
             @RequestParam(defaultValue = "10") int limit) {
         List<ChipTransaction> transactions = chipTransactionService.getLargestTransactions(roomId, limit);
-        return ResponseEntity.ok(transactions);
+        List<ChipTransactionDTO> dtos = transactions.stream()
+            .map(ChipTransactionDTO::new)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     /**
