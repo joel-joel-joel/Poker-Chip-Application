@@ -8,12 +8,33 @@ import "./BetPanel.css";
 type BetPanelProps = {
   yourBet: number;
   currentBet: number;
+  pot?: number;
+  maxBet?: number;
+  onBetChange?: (amount: number) => void;
 };
 
-export default function BetPanel({ yourBet, currentBet }: BetPanelProps) {
-  
+export default function BetPanel({
+  yourBet,
+  currentBet,
+  pot = 0,
+  maxBet = 1000,
+  onBetChange
+}: BetPanelProps) {
+
   const [bet, setBet] = React.useState<number>(yourBet);
-  const [pot, setPot] = React.useState<number>(0);
+
+  // Update bet when yourBet prop changes
+  React.useEffect(() => {
+    setBet(yourBet);
+  }, [yourBet]);
+
+  // Call onBetChange when bet changes
+  const handleBetChange = (newBet: number) => {
+    setBet(newBet);
+    if (onBetChange) {
+      onBetChange(newBet);
+    }
+  };
 
   return (
     <Box className="bet-panel">
@@ -31,9 +52,9 @@ export default function BetPanel({ yourBet, currentBet }: BetPanelProps) {
       <Slider.Root
         className="slider-root"
         value={[bet]}
-        max={1000}
+        max={maxBet}
         step={10}
-        onValueChange={(v) => setBet(v[0] ?? 0)}
+        onValueChange={(v) => handleBetChange(v[0] ?? 0)}
       >
         <Slider.Track className="slider-track">
           <Slider.Range className="slider-range" />
