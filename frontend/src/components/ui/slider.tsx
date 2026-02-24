@@ -1,7 +1,4 @@
-"use client"; 
-
 import * as Slider from "@radix-ui/react-slider"; 
-import "./slider.css"; 
 
 const SliderDemo = () => (
   <form>

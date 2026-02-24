@@ -28,7 +28,7 @@ export const roomService = {
    * GET /api/rooms/{roomCode}
    */
   async getRoomByCode(roomCode: string): Promise<RoomDTO> {
-    return apiClient.get<RoomDTO>(`/api/rooms/${roomCode}`);
+    return apiClient.get<RoomDTO>(`/api/rooms/${roomCode}`, undefined, true);
   },
 
   /**
@@ -36,15 +36,22 @@ export const roomService = {
    * GET /api/rooms/{roomCode}/state
    */
   async getRoomState(roomCode: string): Promise<RoomStateDTO> {
-    return apiClient.get<RoomStateDTO>(`/api/rooms/${roomCode}/state`);
+    return apiClient.get<RoomStateDTO>(`/api/rooms/${roomCode}/state`, undefined, true);
   },
 
   /**
    * List all available rooms
-   * GET /api/rooms/available
+   * GET /api/rooms/waiting (uses pagination, returns first 100 rooms)
    */
   async getAvailableRooms(): Promise<RoomDTO[]> {
-    return apiClient.get<RoomDTO[]>('/api/rooms/available');
+    // Use waiting endpoint with pagination to get all WAITING rooms
+    // This includes rooms with just 1 player (host), unlike /available which requires 2+
+    const response = await apiClient.get<PageResponse<RoomDTO>>(
+      '/api/rooms/waiting',
+      { page: 0, size: 100 },
+      true
+    );
+    return response.content;
   },
 
   /**
@@ -52,7 +59,7 @@ export const roomService = {
    * GET /api/rooms/waiting?page=0&size=20
    */
   async getWaitingRooms(params?: PageRequest): Promise<PageResponse<RoomDTO>> {
-    return apiClient.get<PageResponse<RoomDTO>>('/api/rooms/waiting', params as any);
+    return apiClient.get<PageResponse<RoomDTO>>('/api/rooms/waiting', params as any, true);
   },
 
   /**
@@ -60,7 +67,7 @@ export const roomService = {
    * GET /api/rooms/active?minPlayers=2
    */
   async getActiveRooms(minPlayers?: number): Promise<RoomDTO[]> {
-    return apiClient.get<RoomDTO[]>('/api/rooms/active', minPlayers ? { minPlayers } : undefined);
+    return apiClient.get<RoomDTO[]>('/api/rooms/active', minPlayers ? { minPlayers } : undefined, true);
   },
 
   /**
@@ -92,7 +99,7 @@ export const roomService = {
    * GET /api/rooms/stats/active-count
    */
   async getActiveRoomCount(): Promise<number> {
-    const response = await apiClient.get<{ count: number }>('/api/rooms/stats/active-count');
+    const response = await apiClient.get<{ count: number }>('/api/rooms/stats/active-count', undefined, true);
     return response.count;
   },
 
@@ -117,7 +124,7 @@ export const roomService = {
    * GET /api/room-players/room/{roomCode}
    */
   async getRoomPlayers(roomCode: string): Promise<RoomPlayerDTO[]> {
-    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomCode}`);
+    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomCode}`, undefined, true);
   },
 
   /**
@@ -125,7 +132,7 @@ export const roomService = {
    * GET /api/room-players/room/{roomCode}/leaderboard
    */
   async getRoomLeaderboard(roomCode: string): Promise<RoomPlayerDTO[]> {
-    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomCode}/leaderboard`);
+    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomCode}/leaderboard`, undefined, true);
   },
 
   /**
@@ -133,7 +140,7 @@ export const roomService = {
    * GET /api/room-players/room/{roomCode}/top?limit=5
    */
   async getTopPlayers(roomCode: string, limit: number = 5): Promise<RoomPlayerDTO[]> {
-    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomCode}/top`, { limit });
+    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomCode}/top`, { limit }, true);
   },
 
   /**
@@ -141,7 +148,7 @@ export const roomService = {
    * GET /api/room-players/room/{roomId}/eliminated
    */
   async getEliminatedPlayers(roomId: string): Promise<RoomPlayerDTO[]> {
-    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomId}/eliminated`);
+    return apiClient.get<RoomPlayerDTO[]>(`/api/room-players/room/${roomId}/eliminated`, undefined, true);
   },
 
   /**
@@ -157,7 +164,7 @@ export const roomService = {
    * GET /api/room-players/room/{roomId}/stats
    */
   async getRoomStats(roomId: string): Promise<RoomStatsDTO> {
-    return apiClient.get<RoomStatsDTO>(`/api/room-players/room/${roomId}/stats`);
+    return apiClient.get<RoomStatsDTO>(`/api/room-players/room/${roomId}/stats`, undefined, true);
   }
 };
 

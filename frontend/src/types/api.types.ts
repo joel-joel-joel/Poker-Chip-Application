@@ -19,6 +19,11 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
 // ============================================================================
 // User Types
 // ============================================================================

@@ -2,7 +2,7 @@
  * User Registration Page
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
@@ -10,7 +10,13 @@ import { Button } from '../components/ui/button';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/lobby');
+    }
+  }, [isAuthenticated, navigate]);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -31,7 +37,7 @@ export const RegisterPage: React.FC = () => {
     }
   };
 
-  const validateForm = async (): Promise<boolean> => {
+  const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
     // Username validation
@@ -39,11 +45,6 @@ export const RegisterPage: React.FC = () => {
       newErrors.username = 'Username is required';
     } else if (formData.username.length < 3) {
       newErrors.username = 'Username must be at least 3 characters';
-    } else {
-      const isAvailable = await authService.checkUsernameAvailability(formData.username);
-      if (!isAvailable) {
-        newErrors.username = 'Username is already taken';
-      }
     }
 
     // Email validation
@@ -51,11 +52,6 @@ export const RegisterPage: React.FC = () => {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Invalid email format';
-    } else {
-      const isAvailable = await authService.checkEmailAvailability(formData.email);
-      if (!isAvailable) {
-        newErrors.email = 'Email is already registered';
-      }
     }
 
     // Password validation
@@ -76,15 +72,18 @@ export const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     setIsLoading(true);
 
     try {
-      const isValid = await validateForm();
+      // Validate form
+      const isValid = validateForm();
       if (!isValid) {
         setIsLoading(false);
         return;
       }
 
+      // Register user
       const response = await authService.register({
         username: formData.username,
         email: formData.email,
@@ -93,13 +92,19 @@ export const RegisterPage: React.FC = () => {
 
       // Login with the received token
       await login(response.token);
-
-      // Navigate to lobby
-      navigate('/lobby');
+      // Navigation is handled by useEffect watching isAuthenticated
     } catch (error: any) {
-      setErrors({
-        submit: error.message || 'Registration failed. Please try again.'
-      });
+      // Handle registration errors from backend
+      const errorMessage = error?.data?.message || error?.message || 'Registration failed. Please try again.';
+
+      // Check if it's a duplicate username/email error
+      if (errorMessage.toLowerCase().includes('username')) {
+        setErrors({ username: 'Username is already taken' });
+      } else if (errorMessage.toLowerCase().includes('email')) {
+        setErrors({ email: 'Email is already registered' });
+      } else {
+        setErrors({ submit: errorMessage });
+      }
     } finally {
       setIsLoading(false);
     }

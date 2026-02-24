@@ -37,6 +37,9 @@ public class RoomService {
     @Autowired
     private RoomPlayerService roomPlayerService;
 
+    @Autowired
+    private GameRoundService gameRoundService;
+
     @Autowired(required = false)
     private SimpMessagingTemplate messagingTemplate;
 
@@ -108,8 +111,13 @@ public class RoomService {
             throw new InsufficientPlayersException("Game must have at least 2 players to start.");
         }
 
+        // Update room status to ACTIVE
         roomRepo.updateRoomStatus(room.getId(), Room.roomStatus.ACTIVE);
 
+        // Create the first poker round
+        gameRoundService.startNewRound(roomCode);
+
+        // Notify players via WebSocket
         if (messagingTemplate != null) {
             messagingTemplate.convertAndSend("/topic/room/" + roomCode,
                     new GameEvent("GAME_STARTED", "Game has started!"));

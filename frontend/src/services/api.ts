@@ -4,6 +4,7 @@
  */
 
 import { tokenUtils } from '../utils/token';
+import { authEvents } from '../utils/authEvents';
 
 // API base URL - adjust for production
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -80,7 +81,7 @@ class ApiClient {
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401) {
       tokenUtils.removeToken();
-      window.location.href = '/login';
+      authEvents.emit();
       throw new ApiError(401, 'Unauthorized', 'Session expired. Please login again.');
     }
 
@@ -90,9 +91,18 @@ class ApiClient {
       try {
         errorData = await response.json();
       } catch {
-        errorData = response.statusText;
+        errorData = { message: response.statusText };
       }
-      throw new ApiError(response.status, response.statusText, errorData);
+
+      // Create error with parsed data
+      const error = new ApiError(response.status, response.statusText, errorData);
+
+      // Add helpful message property
+      if (typeof errorData === 'object' && errorData !== null) {
+        (error as any).message = errorData.message || errorData.error || response.statusText;
+      }
+
+      throw error;
     }
 
     // Handle 204 No Content

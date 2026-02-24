@@ -1,5 +1,6 @@
 package com.joelcode.pokerchipsapplication.controller;
 
+import com.joelcode.pokerchipsapplication.dto.request.LoginRequest;
 import com.joelcode.pokerchipsapplication.dto.request.RegisterRequest;
 import com.joelcode.pokerchipsapplication.dto.response.AuthResponse;
 import com.joelcode.pokerchipsapplication.entities.User;
@@ -34,6 +35,14 @@ public class AuthController {
     }
 
     // Login existing user - POST /api/auth/login
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        String token = userService.authenticateUser(request.getUsername(), request.getPassword());
+        User user = userService.findByUsername(request.getUsername());
+        AuthResponse response = new AuthResponse(token, "Bearer", user.getUsername(), user.getEmail());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/check-username")
     public ResponseEntity<Boolean> checkUsername(@RequestParam String username){
         boolean available = userService.isUsernameAvailable(username);

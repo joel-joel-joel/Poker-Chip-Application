@@ -24,8 +24,21 @@ export const authService = {
   },
 
   /**
+   * Login an existing user
+   * POST /api/auth/login
+   */
+  async login(data: { username: string; password: string }): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>('/api/auth/login', data);
+    if (response.token) {
+      tokenUtils.setToken(response.token);
+    }
+    return response;
+  },
+
+  /**
    * Check if username is available
    * GET /api/auth/check-username?username=X
+   * NOTE: If endpoint doesn't exist, assumes username is available (backend will validate on registration)
    */
   async checkUsernameAvailability(username: string): Promise<boolean> {
     try {
@@ -34,15 +47,18 @@ export const authService = {
         { username }
       );
       return response.available;
-    } catch (error) {
-      console.error('Error checking username:', error);
-      return false;
+    } catch (error: any) {
+      console.warn('Username availability check failed (endpoint may not exist):', error.message);
+      // If endpoint doesn't exist (404) or errors, assume available
+      // Backend will validate on registration anyway
+      return true;
     }
   },
 
   /**
    * Check if email is available
    * GET /api/auth/check-email?email=X
+   * NOTE: If endpoint doesn't exist, assumes email is available (backend will validate on registration)
    */
   async checkEmailAvailability(email: string): Promise<boolean> {
     try {
@@ -51,9 +67,11 @@ export const authService = {
         { email }
       );
       return response.available;
-    } catch (error) {
-      console.error('Error checking email:', error);
-      return false;
+    } catch (error: any) {
+      console.warn('Email availability check failed (endpoint may not exist):', error.message);
+      // If endpoint doesn't exist (404) or errors, assume available
+      // Backend will validate on registration anyway
+      return true;
     }
   },
 

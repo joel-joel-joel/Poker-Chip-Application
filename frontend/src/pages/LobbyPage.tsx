@@ -52,9 +52,8 @@ export const LobbyPage: React.FC = () => {
     try {
       const newRoom = await roomService.createRoom(createFormData);
       setShowCreateForm(false);
-      // Join the room automatically
-      await roomService.joinRoom(newRoom.roomCode);
-      // Navigate to the room
+      // Host is automatically added as a player on the backend
+      // Navigate directly to the room
       navigate(`/room/${newRoom.roomCode}`);
     } catch (err: any) {
       setError(err.message || 'Failed to create room');
@@ -71,6 +70,8 @@ export const LobbyPage: React.FC = () => {
   };
 
   const getRoomStatusBadge = (status: RoomStatus) => {
+    if (!status) return null;
+
     const colors = {
       WAITING: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
       IN_PROGRESS: 'bg-green-500/20 text-green-400 border-green-500/30',

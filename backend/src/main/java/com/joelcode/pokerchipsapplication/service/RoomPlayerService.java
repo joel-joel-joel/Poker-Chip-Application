@@ -59,6 +59,9 @@ public class RoomPlayerService {
 
         RoomPlayer savedPlayer = roomPlayerRepo.save(roomPlayer);
 
+        // Eagerly load user to prevent LazyInitializationException
+        savedPlayer.getUser().getUsername();
+
         // Notify other players
         if (messagingTemplate != null) {
             messagingTemplate.convertAndSend("/topic/room/" + room.getCode() + "/players",
@@ -72,7 +75,12 @@ public class RoomPlayerService {
         Room room = roomRepo.findByCode(roomCode)
                 .orElseThrow(() -> new RoomNotFoundException("Room not found"));
         Long currentPlayers = roomPlayerRepo.getPlayerCountInRoom(room.getId());
-        return addRoomPlayer(room, user, currentPlayers.intValue());
+        RoomPlayer player = addRoomPlayer(room, user, currentPlayers.intValue());
+
+        // Eagerly load user to prevent LazyInitializationException
+        player.getUser().getUsername();
+
+        return player;
     }
 
     public void removePlayerFromRoom(UUID roomId, UUID userId) {

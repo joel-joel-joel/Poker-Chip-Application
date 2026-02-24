@@ -1,5 +1,6 @@
 package com.joelcode.pokerchipsapplication.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -29,6 +30,7 @@ public class Room {
     private UUID id;
 
     @Column(nullable = false, length = 100)
+    @JsonProperty("name")
     private String roomName;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,6 +44,7 @@ public class Room {
     private int maxPlayers = 10;
 
     @Column(name = "staring_chips")
+    @JsonProperty("startingChips")
     private int staringChips = 1000;
 
     @CreationTimestamp
@@ -53,6 +56,7 @@ public class Room {
     private List<RoomPlayer> roomPlayers = new ArrayList<>();
 
     @Column(name = "code", unique = true, length = 6, nullable = false)
+    @JsonProperty("roomCode")
     private String code;
 
     public UUID getId() {
@@ -134,6 +138,18 @@ public class Room {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    // JSON serialization helper for hostId
+    @JsonProperty("hostId")
+    public String getHostId() {
+        return host != null ? host.getId().toString() : null;
+    }
+
+    // JSON serialization helper for currentPlayerCount
+    @JsonProperty("currentPlayerCount")
+    public int getCurrentPlayerCount() {
+        return roomPlayers != null ? roomPlayers.size() : 0;
     }
 
     public enum roomStatus {

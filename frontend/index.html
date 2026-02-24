@@ -5,6 +5,10 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Poker Chips Application</title>
+    <script>
+      // Polyfill for SockJS-client (expects Node.js globals)
+      window.global = window;
+    </script>
   </head>
   <body>
     <div id="root"></div>

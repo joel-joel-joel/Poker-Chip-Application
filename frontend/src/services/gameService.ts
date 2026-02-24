@@ -45,7 +45,7 @@ export const gameService = {
    * GET /api/poker/round/{roundId}/state
    */
   async getRoundState(roundId: string): Promise<RoundStateDTO> {
-    return apiClient.get<RoundStateDTO>(`/api/poker/round/${roundId}/state`);
+    return apiClient.get<RoundStateDTO>(`/api/poker/round/${roundId}/state`, undefined, true);
   },
 
   /**
@@ -54,7 +54,7 @@ export const gameService = {
    */
   async getCurrentRound(roomCode: string): Promise<PokerRoundDTO | null> {
     try {
-      return await apiClient.get<PokerRoundDTO>(`/api/poker/room/${roomCode}/current-round`);
+      return await apiClient.get<PokerRoundDTO>(`/api/poker/room/${roomCode}/current-round`, undefined, true);
     } catch (error: any) {
       // If no active round, return null instead of throwing
       if (error.status === 404) {

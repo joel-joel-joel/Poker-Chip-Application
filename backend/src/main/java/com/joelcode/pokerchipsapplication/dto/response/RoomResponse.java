@@ -1,5 +1,6 @@
 package com.joelcode.pokerchipsapplication.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.joelcode.pokerchipsapplication.entities.Room;
 
 import java.time.LocalDateTime;
@@ -8,10 +9,19 @@ import java.util.UUID;
 public class RoomResponse {
 
     private UUID id;
+
+    @JsonProperty("roomCode")
     private String code;
+
     private String name;
     private String hostUsername;
+
+    @JsonProperty("hostId")
+    private String hostId;
+
+    @JsonProperty("status")
     private Room.roomStatus roomStatus;
+
     private Integer maxPlayers;
     private Integer startingChips;
     private Integer currentPlayerCount;
@@ -24,6 +34,7 @@ public class RoomResponse {
         this.code = room.getCode();
         this.name = room.getRoomName();
         this.hostUsername = room.getHost() != null ? room.getHost().getUsername() : null;
+        this.hostId = room.getHost() != null ? room.getHost().getId().toString() : null;
         this.roomStatus = room.getStatus();
         this.maxPlayers = room.getMaxPlayers();
         this.startingChips = room.getStaringChips();
@@ -47,6 +58,9 @@ public class RoomResponse {
 
     public String getHostUsername() { return hostUsername; }
     public void setHostUsername(String hostUsername) { this.hostUsername = hostUsername; }
+
+    public String getHostId() { return hostId; }
+    public void setHostId(String hostId) { this.hostId = hostId; }
 
     public Room.roomStatus getRoomStatus() { return roomStatus; }
     public void setRoomStatus(Room.roomStatus roomStatus) { this.roomStatus = roomStatus; }

@@ -25,7 +25,7 @@ export const GameRoomPage: React.FC = () => {
   const { roomCode } = useParams<{ roomCode: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscribeToRoom, subscribeToRound, unsubscribe } = useWebSocket();
+  const { subscribeToRoom, subscribeToRound, unsubscribe, isConnected } = useWebSocket();
 
   const [room, setRoom] = useState<RoomDTO | null>(null);
   const [players, setPlayers] = useState<RoomPlayerDTO[]>([]);
@@ -42,7 +42,7 @@ export const GameRoomPage: React.FC = () => {
    * Load room data on mount and set up WebSocket subscriptions
    */
   useEffect(() => {
-    if (!roomCode) return;
+    if (!roomCode || !isConnected) return;
     loadRoomData();
 
     // Subscribe to room updates via WebSocket
@@ -56,13 +56,13 @@ export const GameRoomPage: React.FC = () => {
     return () => {
       unsubscribe(`/topic/room/${roomCode}`);
     };
-  }, [roomCode]);
+  }, [roomCode, isConnected]);
 
   /**
    * Subscribe to round updates when round changes
    */
   useEffect(() => {
-    if (!currentRound) return;
+    if (!currentRound || !isConnected) return;
 
     subscribeToRound(currentRound.id, (message) => {
       console.log('Round update received:', message);
@@ -74,7 +74,7 @@ export const GameRoomPage: React.FC = () => {
     return () => {
       unsubscribe(`/topic/round/${currentRound.id}`);
     };
-  }, [currentRound?.id]);
+  }, [currentRound?.id, isConnected]);
 
   const loadRoomData = async () => {
     if (!roomCode) return;
@@ -100,8 +100,11 @@ export const GameRoomPage: React.FC = () => {
 
       setIsLoading(false);
     } catch (err: any) {
-      console.error('Error loading room data:', err);
-      setError(err.message || 'Failed to load room data');
+      // Don't show error for 401 - event system handles navigation
+      if (err.status !== 401) {
+        console.error('Error loading room data:', err);
+        setError(err.message || 'Failed to load room data');
+      }
       setIsLoading(false);
     }
   };

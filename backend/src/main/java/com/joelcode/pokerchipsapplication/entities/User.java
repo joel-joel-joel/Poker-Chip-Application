@@ -1,5 +1,6 @@
 package com.joelcode.pokerchipsapplication.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -42,6 +43,7 @@ public class User {
 
     // Maps to variable user in RoomPlayer entity to retrieve user ingame information
     @OneToMany (mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore // Prevent circular reference during JSON serialization
     private List<RoomPlayer> roomPlayers = new ArrayList<>();
 
     public UUID getId() {

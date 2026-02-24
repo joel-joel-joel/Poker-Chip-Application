@@ -1,10 +1,4 @@
-/**
- * User Login Page
- * Note: Backend doesn't have a separate login endpoint, only register.
- * This page redirects to register for now. You may need to add a login endpoint.
- */
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useAuth } from '../hooks/useAuth';
@@ -12,7 +6,13 @@ import { Button } from '../components/ui/button';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/lobby');
+    }
+  }, [isAuthenticated, navigate]);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -34,16 +34,9 @@ export const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      // NOTE: Backend currently only has /api/auth/register endpoint
-      // You need to add a POST /api/auth/login endpoint in the backend
-      // For now, this will fail and show an error message
-
-      // Placeholder for login API call
-      // const response = await apiClient.post('/api/auth/login', formData);
-      // await login(response.token);
-      // navigate('/lobby');
-
-      setError('Login endpoint not yet implemented in backend. Please use Register instead.');
+      const response = await authService.login(formData);
+      await login(response.token);
+      // Navigation is handled by useEffect watching isAuthenticated
     } catch (err: any) {
       setError(err.message || 'Invalid username or password');
     } finally {
@@ -120,12 +113,6 @@ export const LoginPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Temporary Notice */}
-          <div className="mt-6 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
-            <p className="text-xs text-yellow-400 text-center">
-              Note: Login endpoint needs to be added to backend. Use Register for now.
-            </p>
-          </div>
         </div>
       </div>
     </div>

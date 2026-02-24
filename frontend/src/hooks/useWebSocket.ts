@@ -3,37 +3,40 @@
  * Manages WebSocket connection and subscriptions
  */
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { websocketService } from '../services/websocket';
 
 type MessageHandler = (message: any) => void;
 
 export const useWebSocket = () => {
-  const isConnectedRef = useRef(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const hasAttemptedConnection = useRef(false);
 
   useEffect(() => {
-    // Connect on mount
-    if (!isConnectedRef.current) {
+    if (!hasAttemptedConnection.current) {
+      hasAttemptedConnection.current = true;
+
       websocketService.connect(
         () => {
-          isConnectedRef.current = true;
+          console.log('WebSocket connected successfully');
+          setIsConnected(true);
         },
         (error) => {
           console.error('WebSocket connection error:', error);
+          setIsConnected(false);
         }
       );
     }
 
-    // Disconnect on unmount
     return () => {
-      if (isConnectedRef.current) {
-        websocketService.disconnect();
-        isConnectedRef.current = false;
-      }
+      websocketService.disconnect();
+      setIsConnected(false);
+      hasAttemptedConnection.current = false;
     };
   }, []);
 
   return {
+    isConnected,
     subscribe: (topic: string, handler: MessageHandler) => {
       websocketService.subscribe(topic, handler);
     },
@@ -52,7 +55,6 @@ export const useWebSocket = () => {
     subscribeToPlayer: (playerId: string, handler: MessageHandler) => {
       websocketService.subscribeToPlayer(playerId, handler);
     },
-    isConnected: () => websocketService.isWebSocketConnected()
   };
 };
 

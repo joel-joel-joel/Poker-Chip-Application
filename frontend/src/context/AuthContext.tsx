@@ -31,16 +31,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    */
   useEffect(() => {
     const loadUser = async () => {
-      if (authService.isAuthenticated()) {
-        try {
-          const userData = await authService.getCurrentUser();
-          setUser(userData);
-        } catch (error) {
-          console.error('Failed to load user:', error);
-          authService.logout();
+      try {
+        if (authService.isAuthenticated()) {
+          try {
+            const userData = await authService.getCurrentUser();
+            setUser(userData);
+          } catch (error) {
+            console.error('Failed to load user:', error);
+            authService.logout();
+          }
         }
+      } catch (error) {
+        console.error('Error in auth check:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     loadUser();
